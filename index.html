@@ -144,12 +144,14 @@
     });
 
     function saveData() {
-      fetch(SHEET_WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transactions, vendors, budget })
-      }).then(fetchData);
-    }
+  updateUI(); // Instant local update
+  fetch(SHEET_WEBHOOK_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ transactions, vendors, budget })
+  })
+  .then(() => fetchData());  // Sync UI with official Google Sheet version
+}
 
     fetchData();
   </script>
