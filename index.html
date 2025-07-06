@@ -124,8 +124,18 @@
   <div id="transactions"></div>
 
   <script>
-    let MAX_BUDGET = 575;
-    let totalSpent = 0;
+    const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycby8Xycbq4Qf9RAovJF13GRFngm17oIi7AOSWYOobr98b7pJ00n3yo1Fmc6r2PLZv7QB/exec";
+
+    function getWeekKey(date = new Date()) {
+      const year = date.getFullYear();
+      const week = Math.ceil((((date - new Date(year, 0, 1)) / 86400000) + new Date(year, 0, 1).getDay() + 1) / 7);
+      return `${year}-W${week}`;
+    }
+
+    let MAX_BUDGET = parseFloat(localStorage.getItem('budget')) || 575;
+    let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+    let savedWeek = localStorage.getItem('week') || getWeekKey();
+    let totalSpent = transactions.reduce((acc, tx) => acc + tx.amount, 0);
 
     const form = document.getElementById('transaction-form');
     const transactionsDiv = document.getElementById('transactions');
@@ -135,8 +145,7 @@
       const newBudget = parseFloat(document.getElementById('starting-budget').value);
       if (!isNaN(newBudget) && newBudget > 0) {
         MAX_BUDGET = newBudget;
-        totalSpent = 0;
-        transactionsDiv.innerHTML = '';
+        localStorage.setItem('budget', newBudget);
         updateBalance();
       }
     }
@@ -150,25 +159,60 @@
       document.getElementById('description').value = store;
     }
 
+    function renderTransactions() {
+      transactionsDiv.innerHTML = '';
+      transactions.slice().reverse().forEach(tx => {
+        const entry = document.createElement('div');
+        entry.className = 'transaction';
+        entry.textContent = `${tx.timestamp} - ${tx.description}: -$${tx.amount.toFixed(2)}`;
+        transactionsDiv.appendChild(entry);
+      });
+    }
+
+    function resetWeekIfNeeded() {
+      const currentWeek = getWeekKey();
+      if (currentWeek !== savedWeek) {
+        const leftover = (MAX_BUDGET - totalSpent).toFixed(2);
+        const summary = {
+          week: savedWeek,
+          spent: totalSpent.toFixed(2),
+          leftover,
+          timestamp: new Date().toLocaleString(),
+          transactions
+        };
+        fetch(SHEET_WEBHOOK_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(summary)
+        });
+        transactions = [];
+        totalSpent = 0;
+        savedWeek = currentWeek;
+        localStorage.setItem('week', currentWeek);
+        localStorage.setItem('transactions', JSON.stringify([]));
+        renderTransactions();
+      }
+    }
+
     form.addEventListener('submit', function(event) {
       event.preventDefault();
-
       const description = document.getElementById('description').value;
       const amount = parseFloat(document.getElementById('amount').value);
-
       if (isNaN(amount) || amount <= 0) return;
-
-      totalSpent += amount;
       const timestamp = new Date().toLocaleString();
-
-      const entry = document.createElement('div');
-      entry.className = 'transaction';
-      entry.textContent = `${timestamp} - ${description}: -$${amount.toFixed(2)}`;
-      transactionsDiv.prepend(entry);
-
+      const tx = { description, amount, timestamp };
+      transactions.push(tx);
+      totalSpent += amount;
+      localStorage.setItem('transactions', JSON.stringify(transactions));
+      renderTransactions();
       updateBalance();
       form.reset();
     });
+
+    resetWeekIfNeeded();
+    renderTransactions();
+    updateBalance();
   </script>
 </body>
 </html>
