@@ -1,24 +1,6 @@
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbzXFTEU7PPq5Yg1CSbOPAKqImlgdew9eloNJ7ia0pN0AFFCiHZxa30nJl2UACqtj1hX6w/exec";
-
 let transactions = [];
-let vendors = [];
+let vendors = ["AMAZON", "WALMART", "PIZZA PIZZA", "FORTINOS", "DOLLARAMA"];
 let budget = 0;
-
-async function fetchData() {
-  try {
-    console.log("[fetchData] Fetching data...");
-    const res = await fetch(SHEET_URL);
-    const data = await res.json();
-    console.log("[fetchData] Received data:", data);
-
-    transactions = data.transactions || [];
-    vendors = data.vendors || [];
-    budget = data.budget || 0;
-    updateUI();
-  } catch (err) {
-    console.error("[fetchData] Error fetching data:", err);
-  }
-}
 
 function updateUI() {
   document.getElementById("weeklyBudget").value = budget;
@@ -43,56 +25,56 @@ function updateUI() {
 function setBudget() {
   const input = document.getElementById("weeklyBudget").value;
   budget = Number(input);
-  console.log("[setBudget] Input:", input);
-  console.log("[setBudget] Parsed Budget:", budget);
-
   if (isNaN(budget) || budget <= 0) {
     alert("Please enter a valid budget amount.");
     return;
   }
-
   saveData();
 }
 
 function addTransaction() {
   const desc = document.getElementById("vendorDropdown").value;
   const amt = Number(document.getElementById("amount").value);
-  console.log("[addTransaction] Description:", desc);
-  console.log("[addTransaction] Amount:", amt);
-
   if (!desc || amt <= 0 || isNaN(amt)) {
     alert("Please select a vendor and enter a valid amount.");
     return;
   }
-
   transactions.push({ description: desc, amount: amt, timestamp: new Date().toISOString() });
   document.getElementById("amount").value = "";
   saveData();
 }
 
 function deleteTransaction(index) {
-  console.log("[deleteTransaction] Removing index:", index);
   transactions.splice(index, 1);
   saveData();
 }
 
 function saveData() {
-  console.log("[saveData] Saving:", { transactions, vendors, budget });
-
-  updateUI(); // Optimistic UI update
-
-  fetch(SHEET_URL, {
+  fetch("/.netlify/functions/saveData", {
     method: "POST",
-    body: JSON.stringify({ transactions, vendors, budget }),
-    headers: { "Content-Type": "application/json" }
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ transactions, vendors, budget })
   })
     .then(res => res.json())
     .then(data => {
-      console.log("[saveData] Response from server:", data);
-      fetchData(); // Full sync from server
+      console.log("Saved:", data);
+      fetchData();
     })
     .catch(err => {
-      console.error("[saveData] Error sending data:", err);
+      console.error("Save failed:", err);
+    });
+}
+
+function fetchData() {
+  fetch("/.netlify/functions/saveData", {
+    method: "GET"
+  })
+    .then(res => res.json())
+    .then(data => {
+      transactions = data.transactions || [];
+      vendors = data.vendors || vendors;
+      budget = data.budget || 0;
+      updateUI();
     });
 }
 
