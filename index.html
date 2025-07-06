@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weekly Budget Tracker</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9f9f9;
+      padding: 20px;
+      max-width: 400px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+    }
+    input, button {
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+    }
+    .transaction {
+      border-bottom: 1px solid #ccc;
+      padding: 5px 0;
+    }
+    .balance {
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Weekly Budget Tracker</h1>
+  <form id="transaction-form">
+    <input type="text" id="description" placeholder="Description" required />
+    <input type="number" id="amount" placeholder="Amount" required />
+    <button type="submit">Add Transaction</button>
+  </form>
+
+  <div id="transactions"></div>
+  <div class="balance" id="balance">Remaining: $575.00</div>
+
+  <script>
+    const MAX_BUDGET = 575;
+    let totalSpent = 0;
+
+    const form = document.getElementById('transaction-form');
+    const transactionsDiv = document.getElementById('transactions');
+    const balanceDiv = document.getElementById('balance');
+
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const description = document.getElementById('description').value;
+      const amount = parseFloat(document.getElementById('amount').value);
+
+      if (isNaN(amount) || amount <= 0) return;
+
+      totalSpent += amount;
+      const remaining = (MAX_BUDGET - totalSpent).toFixed(2);
+
+      const entry = document.createElement('div');
+      entry.className = 'transaction';
+      entry.textContent = `${description}: -$${amount.toFixed(2)}`;
+      transactionsDiv.appendChild(entry);
+
+      balanceDiv.textContent = `Remaining: $${remaining}`;
+
+      form.reset();
+    });
+  </script>
+</body>
+</html>
