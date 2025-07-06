@@ -1,4 +1,4 @@
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbxIBDX-ny3nfzVIA9tpmzt8Vx1--zLizxfZCgQyF5eQIzNI423_gugKJfj4GEOYBsxL/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbzXFTEU7PPq5Yg1CSbOPAKqImlgdew9eloNJ7ia0pN0AFFCiHZxa30nJl2UACqtj1hX6w/exec";
 
 let transactions = [];
 let vendors = [];
@@ -53,7 +53,6 @@ function deleteTransaction(index) {
 }
 
 function saveData() {
-  console.log("Saving:", { transactions, vendors, budget });
   updateUI(); // Optimistic update
   fetch(SHEET_URL, {
     method: "POST",
