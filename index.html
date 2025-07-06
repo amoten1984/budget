@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Weekly Budget Tracker</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       background: #f0f2f5;
       padding: 20px;
       max-width: 600px;
@@ -15,7 +15,6 @@
     }
     h1 {
       text-align: center;
-      margin-bottom: 10px;
     }
     .budget-settings {
       display: flex;
@@ -38,21 +37,11 @@
     button:hover {
       background-color: #0056b3;
     }
-    .transaction {
-      border-bottom: 1px solid #ccc;
-      padding: 5px 0;
-      font-size: 0.95rem;
-    }
-    .balance {
-      font-weight: bold;
-      margin-top: 20px;
-      font-size: 1.2rem;
-    }
     .store-icons {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin: 10px 0 20px 0;
+      margin: 10px 0;
       justify-content: center;
     }
     .store-button {
@@ -72,52 +61,62 @@
       max-width: 32px;
       max-height: 32px;
     }
+    .transaction {
+      border-bottom: 1px solid #ccc;
+      padding: 5px 0;
+      font-size: 0.95rem;
+    }
+    .balance {
+      font-weight: bold;
+      margin-top: 20px;
+      font-size: 1.2rem;
+    }
   </style>
 </head>
 <body>
   <h1>Weekly Budget Tracker</h1>
 
-  <div class="store-icons">
-    <button class="store-button" onclick="setDescription('Tim Hortons')">
-      <img src="https://seeklogo.com/images/T/tim-hortons-logo-69E3DCA22E-seeklogo.com.png" alt="Tim Hortons" />
-    </button>
-    <button class="store-button" onclick="setDescription('Pizza Pizza')">
-      <img src="https://www.pizzapizza.ca/assets/images/logo.png" alt="Pizza Pizza" />
-    </button>
-    <button class="store-button" onclick="setDescription('Walmart')">
-      <img src="https://1000logos.net/wp-content/uploads/2017/05/Walmart-logo-500x281.png" alt="Walmart" />
-    </button>
-    <button class="store-button" onclick="setDescription('Fresco')">
-      <img src="https://freshco.com/wp-content/uploads/freshco-logo.png" alt="Fresco" />
-    </button>
-    <button class="store-button" onclick="setDescription('Shopper\'s Drug Mart')">
-      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/1/1b/Shoppers_Drug_Mart_logo.svg/320px-Shoppers_Drug_Mart_logo.svg.png" alt="Shopper's Drug Mart" />
-    </button>
-    <button class="store-button" onclick="setDescription('Popeye\'s')">
-      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/6/66/Popeyes_logo.svg/320px-Popeyes_logo.svg.png" alt="Popeye's" />
-    </button>
-    <button class="store-button" onclick="setDescription('Amazon')">
-      <img src="https://cdn.iconscout.com/icon/free/png-256/amazon-1869030-1583154.png" alt="Amazon" />
-    </button>
-    <button class="store-button" onclick="setDescription('Dollarama')">
-      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e1/Dollarama_logo.svg/1920px-Dollarama_logo.svg.png" alt="Dollarama" />
-    </button>
-    <button class="store-button" onclick="setDescription('Fortinos')">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/3/39/Fortinos_Logo.svg" alt="Fortinos" />
-    </button>
-    <button class="store-button" onclick="setDescription('Home Depot')">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/TheHomeDepot.svg/320px-TheHomeDepot.svg.png" alt="Home Depot" />
-    </button>
-  </div>
-
   <div class="budget-settings">
-    <input type="number" id="starting-budget" placeholder="Set Weekly Budget" />
+    <input type="number" id="starting-budget" placeholder="Set Weekly Budget">
     <button onclick="updateBudget()">Set Budget</button>
   </div>
 
+  <div class="store-icons">
+    <button class="store-button" onclick="setDescription('Tim Hortons')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Tim_Hortons_logo.svg/120px-Tim_Hortons_logo.svg.png" alt="Tim Hortons">
+    </button>
+    <button class="store-button" onclick="setDescription('Pizza Pizza')">
+      <img src="https://www.pizzapizza.ca/assets/images/logo.svg" alt="Pizza Pizza">
+    </button>
+    <button class="store-button" onclick="setDescription('Walmart')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/Walmart_logo.svg" alt="Walmart">
+    </button>
+    <button class="store-button" onclick="setDescription('Fresco')">
+      <img src="https://freshco.com/wp-content/uploads/freshco-logo-black.svg" alt="Fresco">
+    </button>
+    <button class="store-button" onclick="setDescription('Shoppers Drug Mart')">
+      <img src="https://upload.wikimedia.org/wikipedia/en/1/1b/Shoppers_Drug_Mart_logo.svg" alt="Shoppers Drug Mart">
+    </button>
+    <button class="store-button" onclick="setDescription('Popeyes')">
+      <img src="https://upload.wikimedia.org/wikipedia/en/6/66/Popeyes_logo.svg" alt="Popeyes">
+    </button>
+    <button class="store-button" onclick="setDescription('Amazon')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon">
+    </button>
+    <button class="store-button" onclick="setDescription('Dollarama')">
+      <img src="https://upload.wikimedia.org/wikipedia/en/e/e1/Dollarama_logo.svg" alt="Dollarama">
+    </button>
+    <button class="store-button" onclick="setDescription('Fortinos')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/3/39/Fortinos_Logo.svg" alt="Fortinos">
+    </button>
+    <button class="store-button" onclick="setDescription('Home Depot')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/5/5f/TheHomeDepot.svg" alt="Home Depot">
+    </button>
+  </div>
+
   <form id="transaction-form">
-    <input type="text" id="description" placeholder="Description" required />
-    <input type="number" id="amount" placeholder="Amount" required />
+    <input type="text" id="description" placeholder="Description" required>
+    <input type="number" id="amount" placeholder="Amount" required>
     <button type="submit">Add Transaction</button>
   </form>
 
