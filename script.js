@@ -5,12 +5,19 @@ let vendors = [];
 let budget = 0;
 
 async function fetchData() {
-  const res = await fetch(SHEET_URL);
-  const data = await res.json();
-  transactions = data.transactions || [];
-  vendors = data.vendors || [];
-  budget = data.budget || 0;
-  updateUI();
+  try {
+    console.log("[fetchData] Fetching data...");
+    const res = await fetch(SHEET_URL);
+    const data = await res.json();
+    console.log("[fetchData] Received data:", data);
+
+    transactions = data.transactions || [];
+    vendors = data.vendors || [];
+    budget = data.budget || 0;
+    updateUI();
+  } catch (err) {
+    console.error("[fetchData] Error fetching data:", err);
+  }
 }
 
 function updateUI() {
@@ -22,43 +29,71 @@ function updateUI() {
   transactions.forEach((t, index) => {
     const li = document.createElement("li");
     li.className = "transaction-item";
-    li.innerHTML = \`
-      \${new Date(t.timestamp).toLocaleString('en-US', { weekday: 'short', hour: 'numeric', minute: 'numeric' })} - \${t.description}: $\${t.amount}
-      <button onclick="deleteTransaction(\${index})">X</button>
-    \`;
+    li.innerHTML = `
+      ${new Date(t.timestamp).toLocaleString('en-US', { weekday: 'short', hour: 'numeric', minute: 'numeric' })} - ${t.description}: $${t.amount}
+      <button onclick="deleteTransaction(${index})">X</button>
+    `;
     list.appendChild(li);
   });
 
   const dropdown = document.getElementById("vendorDropdown");
-  dropdown.innerHTML = vendors.map(v => \`<option value="\${v}">\${v}</option>\`).join('');
+  dropdown.innerHTML = vendors.map(v => `<option value="${v}">${v}</option>`).join('');
 }
 
 function setBudget() {
-  budget = Number(document.getElementById("weeklyBudget").value);
+  const input = document.getElementById("weeklyBudget").value;
+  budget = Number(input);
+  console.log("[setBudget] Input:", input);
+  console.log("[setBudget] Parsed Budget:", budget);
+
+  if (isNaN(budget) || budget <= 0) {
+    alert("Please enter a valid budget amount.");
+    return;
+  }
+
   saveData();
 }
 
 function addTransaction() {
   const desc = document.getElementById("vendorDropdown").value;
   const amt = Number(document.getElementById("amount").value);
-  if (!desc || amt <= 0) return;
+  console.log("[addTransaction] Description:", desc);
+  console.log("[addTransaction] Amount:", amt);
+
+  if (!desc || amt <= 0 || isNaN(amt)) {
+    alert("Please select a vendor and enter a valid amount.");
+    return;
+  }
+
   transactions.push({ description: desc, amount: amt, timestamp: new Date().toISOString() });
   document.getElementById("amount").value = "";
   saveData();
 }
 
 function deleteTransaction(index) {
+  console.log("[deleteTransaction] Removing index:", index);
   transactions.splice(index, 1);
   saveData();
 }
 
 function saveData() {
-  updateUI(); // Optimistic update
+  console.log("[saveData] Saving:", { transactions, vendors, budget });
+
+  updateUI(); // Optimistic UI update
+
   fetch(SHEET_URL, {
     method: "POST",
     body: JSON.stringify({ transactions, vendors, budget }),
     headers: { "Content-Type": "application/json" }
-  }).then(() => fetchData()); // Full sync
+  })
+    .then(res => res.json())
+    .then(data => {
+      console.log("[saveData] Response from server:", data);
+      fetchData(); // Full sync from server
+    })
+    .catch(err => {
+      console.error("[saveData] Error sending data:", err);
+    });
 }
 
 fetchData();
