@@ -1,159 +1,26 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Weekly Budget Tracker</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f4f6f8;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin: 6px 0;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-    button {
-      background-color: #007bff;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    .transaction {
-      background: white;
-      border-left: 4px solid #007bff;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .delete-btn {
-      background: #dc3545;
-      border: none;
-      color: white;
-      padding: 4px 10px;
-      border-radius: 4px;
-      font-size: 0.9em;
-      cursor: pointer;
-    }
-    .balance {
-      font-weight: bold;
-      font-size: 1.2em;
-      margin-top: 20px;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
-  <h1>Weekly Budget Tracker</h1>
-
-  <div>
-    <input type="number" id="starting-budget" placeholder="Set Weekly Budget" />
-    <button onclick="setBudget()">Set Budget</button>
+  <div class="container">
+    <h1>Weekly Budget Tracker</h1>
+    <div class="budget-input">
+      <input type="number" id="weeklyBudget" placeholder="Set Weekly Budget"/>
+      <button onclick="setBudget()">Set Budget</button>
+    </div>
+    <div class="transaction-input">
+      <select id="vendorDropdown"></select>
+      <input type="number" id="amount" placeholder="Amount"/>
+      <button onclick="addTransaction()">Add Transaction</button>
+    </div>
+    <h2 id="remaining">Remaining: $0.00</h2>
+    <ul id="transactionList"></ul>
   </div>
-
-  <form id="transaction-form">
-    <select id="vendor-select"></select>
-    <input type="number" id="amount" placeholder="Amount" required />
-    <button type="submit">Add Transaction</button>
-  </form>
-
-  <div class="balance" id="balance">Remaining: $0.00</div>
-  <div id="transactions"></div>
-
-  <script>
-    const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxIBDX-ny3nfzVIA9tpmzt8Vx1--zLizxfZCgQyF5eQIzNI423_gugKJfj4GEOYBsxL/exec";
-
-    let transactions = [];
-    let vendors = [];
-    let budget = 0;
-
-    async function fetchData() {
-      const res = await fetch(SHEET_WEBHOOK_URL);
-      const data = await res.json();
-      transactions = data.transactions || [];
-      vendors = data.vendors || [];
-      budget = parseFloat(data.budget) || 0;
-      updateUI();
-    }
-
-    function updateUI() {
-      const balance = budget - transactions.reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
-      document.getElementById("balance").textContent = "Remaining: $" + balance.toFixed(2);
-
-      const vendorSelect = document.getElementById("vendor-select");
-      vendorSelect.innerHTML = "";
-      vendors.forEach(v => {
-        const option = document.createElement("option");
-        option.value = v;
-        option.textContent = v;
-        vendorSelect.appendChild(option);
-      });
-
-      const transactionsDiv = document.getElementById("transactions");
-      transactionsDiv.innerHTML = "";
-      transactions.forEach((tx, index) => {
-        const div = document.createElement("div");
-        div.className = "transaction";
-        const readableDate = new Date(tx.timestamp).toLocaleString("en-US", { weekday: "short", hour: "2-digit", minute: "2-digit" });
-        div.innerHTML = `<span>${readableDate} - ${tx.description}: $${tx.amount}</span>
-                         <button class="delete-btn" onclick="deleteTransaction(${index})">X</button>`;
-        transactionsDiv.appendChild(div);
-      });
-    }
-
-    function setBudget() {
-      const newBudget = parseFloat(document.getElementById("starting-budget").value);
-      if (!isNaN(newBudget) && newBudget > 0) {
-        budget = newBudget;
-        saveData();
-      }
-    }
-
-    function deleteTransaction(index) {
-      transactions.splice(index, 1);
-      saveData();
-    }
-
-    document.getElementById("transaction-form").addEventListener("submit", function (e) {
-      e.preventDefault();
-      const description = document.getElementById("vendor-select").value;
-      const amount = parseFloat(document.getElementById("amount").value);
-      const timestamp = new Date().toISOString();
-      if (description && !isNaN(amount)) {
-        transactions.push({ description, amount, timestamp });
-        saveData();
-        e.target.reset();
-      }
-    });
-
-    function saveData() {
-  updateUI(); // Instant local update
-  fetch(SHEET_WEBHOOK_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ transactions, vendors, budget })
-  })
-  .then(() => fetchData());  // Sync UI with official Google Sheet version
-}
-
-    fetchData();
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
