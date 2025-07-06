@@ -89,149 +89,118 @@
     <button type="submit">Add Transaction</button>
   </form>
 
-  <div class="balance" id="balance">Remaining: $575.00</div>
+  <div class="balance" id="balance">Remaining: $0.00</div>
   <div id="transactions"></div>
 
   <script>
-    const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycby8Xycbq4Qf9RAovJF13GRFngm17oIi7AOSWYOobr98b7pJ00n3yo1Fmc6r2PLZv7QB/exec";
+    const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwvS45L6PTI8A4fBA1h00cGItg0CewF_PcsxaC91zYnKy2MqoE4KYk9Lm8Jmr2_HAQ/exec";
+    let transactions = [];
+    let vendors = [];
+    let MAX_BUDGET = 0;
 
-    const defaultVendors = [
-      "Tim Hortons", "Pizza Pizza", "Walmart", "Fresco",
-      "Shoppers Drug Mart", "Popeyes", "Amazon",
-      "Dollarama", "Fortinos", "Home Depot"
-    ];
-
-    let vendors = JSON.parse(localStorage.getItem('vendors')) || defaultVendors;
-    let MAX_BUDGET = parseFloat(localStorage.getItem('budget')) || 575;
-    let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-    let savedWeek = localStorage.getItem('week') || getWeekKey();
-    let totalSpent = transactions.reduce((acc, tx) => acc + tx.amount, 0);
-
-    const form = document.getElementById('transaction-form');
-    const transactionsDiv = document.getElementById('transactions');
-    const balanceDiv = document.getElementById('balance');
-    const vendorSelect = document.getElementById('vendor-select');
-
-    function updateBudget() {
-      const newBudget = parseFloat(document.getElementById('starting-budget').value);
-      if (!isNaN(newBudget) && newBudget > 0) {
-        MAX_BUDGET = newBudget;
-        localStorage.setItem('budget', newBudget);
+    async function loadData() {
+      try {
+        const res = await fetch(SHEET_WEBHOOK_URL);
+        const data = await res.json();
+        transactions = data.transactions || [];
+        vendors = data.vendors || [];
+        MAX_BUDGET = parseFloat(data.budget) || 0;
+        renderVendorOptions();
+        renderTransactions();
         updateBalance();
+      } catch (err) {
+        console.error("Failed to load data", err);
       }
     }
 
     function updateBalance() {
+      const totalSpent = transactions.reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
       const remaining = (MAX_BUDGET - totalSpent).toFixed(2);
-      balanceDiv.textContent = `Remaining: $${remaining}`;
-    }
-
-    function getWeekKey(date = new Date()) {
-      const dayOffset = date.getDay();
-      const sunday = new Date(date);
-      sunday.setDate(sunday.getDate() - dayOffset);
-      return sunday.toISOString().split('T')[0];
+      document.getElementById("balance").textContent = `Remaining: $${remaining}`;
     }
 
     function renderVendorOptions() {
+      const vendorSelect = document.getElementById("vendor-select");
       vendorSelect.innerHTML = '';
-      vendors.forEach(vendor => {
-        const option = document.createElement('option');
-        option.value = vendor;
-        option.textContent = vendor;
-        vendorSelect.appendChild(option);
+      vendors.forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v;
+        opt.textContent = v;
+        vendorSelect.appendChild(opt);
       });
       vendorSelect.onchange = () => {
-        document.getElementById('description').value = vendorSelect.value;
+        document.getElementById("description").value = vendorSelect.value;
       };
     }
 
     function addVendor() {
-      const newVendor = document.getElementById('new-vendor').value.trim();
+      const newVendor = document.getElementById("new-vendor").value.trim();
       if (newVendor && !vendors.includes(newVendor)) {
         vendors.push(newVendor);
-        localStorage.setItem('vendors', JSON.stringify(vendors));
+        saveToSheet();
         renderVendorOptions();
-        document.getElementById('new-vendor').value = '';
+        document.getElementById("new-vendor").value = '';
       }
     }
 
     function renderTransactions() {
-      transactionsDiv.innerHTML = '';
-      transactions.slice().reverse().forEach((tx, index) => {
-        const entry = document.createElement('div');
-        entry.className = 'transaction';
-        const text = document.createElement('div');
-        text.className = 'transaction-text';
+      const container = document.getElementById("transactions");
+      container.innerHTML = '';
+      transactions.forEach((tx, idx) => {
+        const div = document.createElement("div");
+        div.className = "transaction";
+        const text = document.createElement("div");
+        text.className = "transaction-text";
         const day = new Date(tx.timestamp).toLocaleDateString('en-US', { weekday: 'short' });
-        text.textContent = `${day}, ${tx.timestamp} - ${tx.description}: -$${tx.amount.toFixed(2)}`;
+        text.textContent = `${day}, ${tx.timestamp} - ${tx.description}: -$${tx.amount}`;
 
-        const del = document.createElement('button');
-        del.className = 'delete-button';
-        del.textContent = 'X';
-        del.onclick = () => deleteTransaction(transactions.length - 1 - index);
+        const del = document.createElement("button");
+        del.className = "delete-button";
+        del.textContent = "X";
+        del.onclick = () => {
+          transactions.splice(idx, 1);
+          saveToSheet();
+          renderTransactions();
+          updateBalance();
+        };
 
-        entry.appendChild(text);
-        entry.appendChild(del);
-        transactionsDiv.appendChild(entry);
+        div.appendChild(text);
+        div.appendChild(del);
+        container.appendChild(div);
       });
     }
 
-    function deleteTransaction(index) {
-      if (index >= 0 && index < transactions.length) {
-        totalSpent -= transactions[index].amount;
-        transactions.splice(index, 1);
-        localStorage.setItem('transactions', JSON.stringify(transactions));
-        renderTransactions();
+    document.getElementById("transaction-form").addEventListener("submit", e => {
+      e.preventDefault();
+      const description = document.getElementById("description").value;
+      const amount = parseFloat(document.getElementById("amount").value);
+      if (!description || isNaN(amount) || amount <= 0) return;
+      const timestamp = new Date().toLocaleString();
+      transactions.push({ description, amount, timestamp });
+      saveToSheet();
+      renderTransactions();
+      updateBalance();
+      e.target.reset();
+    });
+
+    function updateBudget() {
+      const newBudget = parseFloat(document.getElementById("starting-budget").value);
+      if (!isNaN(newBudget) && newBudget > 0) {
+        MAX_BUDGET = newBudget;
+        saveToSheet();
         updateBalance();
       }
     }
 
-    function resetWeekIfNeeded() {
-      const currentWeek = getWeekKey();
-      if (currentWeek !== savedWeek) {
-        const leftover = (MAX_BUDGET - totalSpent).toFixed(2);
-        const summary = {
-          week: savedWeek,
-          spent: totalSpent.toFixed(2),
-          leftover,
-          timestamp: new Date().toLocaleString(),
-          transactions
-        };
-        fetch(SHEET_WEBHOOK_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(summary)
-        });
-        transactions = [];
-        totalSpent = 0;
-        savedWeek = currentWeek;
-        localStorage.setItem('week', currentWeek);
-        localStorage.setItem('transactions', JSON.stringify([]));
-        renderTransactions();
-      }
+    function saveToSheet() {
+      fetch(SHEET_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transactions, vendors, budget: MAX_BUDGET })
+      });
     }
 
-    form.addEventListener('submit', function(event) {
-      event.preventDefault();
-      const description = document.getElementById('description').value;
-      const amount = parseFloat(document.getElementById('amount').value);
-      if (isNaN(amount) || amount <= 0) return;
-      const timestamp = new Date().toLocaleString();
-      const tx = { description, amount, timestamp };
-      transactions.push(tx);
-      totalSpent += amount;
-      localStorage.setItem('transactions', JSON.stringify(transactions));
-      renderTransactions();
-      updateBalance();
-      form.reset();
-    });
-
-    resetWeekIfNeeded();
-    renderVendorOptions();
-    renderTransactions();
-    updateBalance();
+    loadData();
   </script>
 </body>
 </html>
