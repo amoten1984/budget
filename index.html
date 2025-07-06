@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Weekly Budget Tracker</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap');
-
     body {
       font-family: 'Segoe UI', sans-serif;
       background: #f0f2f5;
@@ -23,7 +21,7 @@
       gap: 10px;
       margin-bottom: 20px;
     }
-    input, button {
+    input, button, select {
       padding: 10px;
       margin: 5px 0;
       width: 100%;
@@ -38,30 +36,6 @@
     }
     button:hover {
       background-color: #0056b3;
-    }
-    .store-icons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 10px 0;
-      justify-content: center;
-    }
-    .store-button {
-      font-family: 'Roboto', sans-serif;
-      font-weight: 500;
-      background-color: #fff;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 10px 14px;
-      text-align: center;
-      cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      font-size: 0.9rem;
-      min-width: 100px;
-      transition: background-color 0.2s;
-    }
-    .store-button:hover {
-      background-color: #f1f1f1;
     }
     .transaction {
       border-bottom: 1px solid #ccc;
@@ -88,6 +62,11 @@
       margin-top: 20px;
       font-size: 1.2rem;
     }
+    .vendor-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
@@ -98,17 +77,10 @@
     <button onclick="updateBudget()">Set Budget</button>
   </div>
 
-  <div class="store-icons">
-    <button class="store-button" onclick="setDescription('Tim Hortons')">Tim Hortons</button>
-    <button class="store-button" onclick="setDescription('Pizza Pizza')">Pizza Pizza</button>
-    <button class="store-button" onclick="setDescription('Walmart')">Walmart</button>
-    <button class="store-button" onclick="setDescription('Fresco')">Fresco</button>
-    <button class="store-button" onclick="setDescription('Shoppers Drug Mart')">Shoppers Drug Mart</button>
-    <button class="store-button" onclick="setDescription('Popeyes')">Popeyes</button>
-    <button class="store-button" onclick="setDescription('Amazon')">Amazon</button>
-    <button class="store-button" onclick="setDescription('Dollarama')">Dollarama</button>
-    <button class="store-button" onclick="setDescription('Fortinos')">Fortinos</button>
-    <button class="store-button" onclick="setDescription('Home Depot')">Home Depot</button>
+  <div class="vendor-controls">
+    <select id="vendor-select"></select>
+    <input type="text" id="new-vendor" placeholder="Add New Vendor">
+    <button onclick="addVendor()">Add</button>
   </div>
 
   <form id="transaction-form">
@@ -123,13 +95,13 @@
   <script>
     const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycby8Xycbq4Qf9RAovJF13GRFngm17oIi7AOSWYOobr98b7pJ00n3yo1Fmc6r2PLZv7QB/exec";
 
-    function getWeekKey(date = new Date()) {
-      const dayOffset = date.getDay();
-      const sunday = new Date(date);
-      sunday.setDate(sunday.getDate() - dayOffset);
-      return sunday.toISOString().split('T')[0];
-    }
+    const defaultVendors = [
+      "Tim Hortons", "Pizza Pizza", "Walmart", "Fresco",
+      "Shoppers Drug Mart", "Popeyes", "Amazon",
+      "Dollarama", "Fortinos", "Home Depot"
+    ];
 
+    let vendors = JSON.parse(localStorage.getItem('vendors')) || defaultVendors;
     let MAX_BUDGET = parseFloat(localStorage.getItem('budget')) || 575;
     let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
     let savedWeek = localStorage.getItem('week') || getWeekKey();
@@ -138,6 +110,7 @@
     const form = document.getElementById('transaction-form');
     const transactionsDiv = document.getElementById('transactions');
     const balanceDiv = document.getElementById('balance');
+    const vendorSelect = document.getElementById('vendor-select');
 
     function updateBudget() {
       const newBudget = parseFloat(document.getElementById('starting-budget').value);
@@ -153,8 +126,34 @@
       balanceDiv.textContent = `Remaining: $${remaining}`;
     }
 
-    function setDescription(store) {
-      document.getElementById('description').value = store;
+    function getWeekKey(date = new Date()) {
+      const dayOffset = date.getDay();
+      const sunday = new Date(date);
+      sunday.setDate(sunday.getDate() - dayOffset);
+      return sunday.toISOString().split('T')[0];
+    }
+
+    function renderVendorOptions() {
+      vendorSelect.innerHTML = '';
+      vendors.forEach(vendor => {
+        const option = document.createElement('option');
+        option.value = vendor;
+        option.textContent = vendor;
+        vendorSelect.appendChild(option);
+      });
+      vendorSelect.onchange = () => {
+        document.getElementById('description').value = vendorSelect.value;
+      };
+    }
+
+    function addVendor() {
+      const newVendor = document.getElementById('new-vendor').value.trim();
+      if (newVendor && !vendors.includes(newVendor)) {
+        vendors.push(newVendor);
+        localStorage.setItem('vendors', JSON.stringify(vendors));
+        renderVendorOptions();
+        document.getElementById('new-vendor').value = '';
+      }
     }
 
     function renderTransactions() {
@@ -230,6 +229,7 @@
     });
 
     resetWeekIfNeeded();
+    renderVendorOptions();
     renderTransactions();
     updateBalance();
   </script>
