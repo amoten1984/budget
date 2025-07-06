@@ -22,7 +22,7 @@
       gap: 10px;
       margin-bottom: 20px;
     }
-    input, button, select {
+    input, button {
       padding: 10px;
       margin: 5px 0;
       width: 100%;
@@ -56,15 +56,21 @@
       justify-content: center;
     }
     .store-button {
-      padding: 5px 10px;
-      background-color: #eee;
+      width: 48px;
+      height: 48px;
+      background-color: #fff;
       border: 1px solid #ccc;
-      border-radius: 6px;
+      border-radius: 8px;
+      padding: 5px;
       cursor: pointer;
-      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    .store-button:hover {
-      background-color: #ddd;
+    .store-button img {
+      max-width: 32px;
+      max-height: 32px;
     }
   </style>
 </head>
@@ -83,16 +89,36 @@
   </form>
 
   <div class="store-icons">
-    <button class="store-button" onclick="setDescription('Tim Hortons')">Tim Hortons</button>
-    <button class="store-button" onclick="setDescription('Pizza Pizza')">Pizza Pizza</button>
-    <button class="store-button" onclick="setDescription('Walmart')">Walmart</button>
-    <button class="store-button" onclick="setDescription('Fresco')">Fresco</button>
-    <button class="store-button" onclick="setDescription("Shopper's Drug Mart")">Shopper's Drug Mart</button>
-    <button class="store-button" onclick="setDescription('Popeye\'s')">Popeye's</button>
-    <button class="store-button" onclick="setDescription('Amazon')">Amazon</button>
-    <button class="store-button" onclick="setDescription('Dollarama')">Dollarama</button>
-    <button class="store-button" onclick="setDescription('Fortinos')">Fortinos</button>
-    <button class="store-button" onclick="setDescription('Home Depot')">Home Depot</button>
+    <button class="store-button" onclick="setDescription('Tim Hortons')">
+      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/3/3d/Tim_Hortons_logo.svg/120px-Tim_Hortons_logo.svg.png" alt="Tim Hortons" />
+    </button>
+    <button class="store-button" onclick="setDescription('Pizza Pizza')">
+      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Pizza_Pizza_logo.svg/120px-Pizza_Pizza_logo.svg.png" alt="Pizza Pizza" />
+    </button>
+    <button class="store-button" onclick="setDescription('Walmart')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Walmart_logo.svg/120px-Walmart_logo.svg.png" alt="Walmart" />
+    </button>
+    <button class="store-button" onclick="setDescription('Fresco')">
+      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/6/60/FreshCo_logo.svg/120px-FreshCo_logo.svg.png" alt="Fresco" />
+    </button>
+    <button class="store-button" onclick="setDescription(`Shopper's Drug Mart`)">
+      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/1/1b/Shoppers_Drug_Mart_logo.svg/120px-Shoppers_Drug_Mart_logo.svg.png" alt="Shopper's Drug Mart" />
+    </button>
+    <button class="store-button" onclick="setDescription(`Popeye's`)">
+      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/6/66/Popeyes_logo.svg/120px-Popeyes_logo.svg.png" alt="Popeyes" />
+    </button>
+    <button class="store-button" onclick="setDescription('Amazon')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/120px-Amazon_logo.svg.png" alt="Amazon" />
+    </button>
+    <button class="store-button" onclick="setDescription('Dollarama')">
+      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e1/Dollarama_logo.svg/120px-Dollarama_logo.svg.png" alt="Dollarama" />
+    </button>
+    <button class="store-button" onclick="setDescription('Fortinos')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Fortinos_Logo.svg/120px-Fortinos_Logo.svg.png" alt="Fortinos" />
+    </button>
+    <button class="store-button" onclick="setDescription('Home Depot')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/TheHomeDepot.svg/120px-TheHomeDepot.svg.png" alt="Home Depot" />
+    </button>
   </div>
 
   <div class="balance" id="balance">Remaining: $575.00</div>
