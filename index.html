@@ -6,48 +6,124 @@
   <title>Weekly Budget Tracker</title>
   <style>
     body {
-      font-family: sans-serif;
-      background: #f9f9f9;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
       padding: 20px;
-      max-width: 400px;
+      max-width: 600px;
       margin: auto;
+      color: #333;
     }
     h1 {
       text-align: center;
+      margin-bottom: 10px;
     }
-    input, button {
+    .budget-settings {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input, button, select {
       padding: 10px;
       margin: 5px 0;
       width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
     }
     .transaction {
       border-bottom: 1px solid #ccc;
       padding: 5px 0;
+      font-size: 0.95rem;
     }
     .balance {
       font-weight: bold;
       margin-top: 20px;
+      font-size: 1.2rem;
+    }
+    .store-icons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 10px 0;
+      justify-content: center;
+    }
+    .store-button {
+      padding: 5px 10px;
+      background-color: #eee;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .store-button:hover {
+      background-color: #ddd;
     }
   </style>
 </head>
 <body>
   <h1>Weekly Budget Tracker</h1>
+
+  <div class="budget-settings">
+    <input type="number" id="starting-budget" placeholder="Set Weekly Budget" />
+    <button onclick="updateBudget()">Set Budget</button>
+  </div>
+
   <form id="transaction-form">
     <input type="text" id="description" placeholder="Description" required />
     <input type="number" id="amount" placeholder="Amount" required />
     <button type="submit">Add Transaction</button>
   </form>
 
-  <div id="transactions"></div>
+  <div class="store-icons">
+    <button class="store-button" onclick="setDescription('Tim Hortons')">Tim Hortons</button>
+    <button class="store-button" onclick="setDescription('Pizza Pizza')">Pizza Pizza</button>
+    <button class="store-button" onclick="setDescription('Walmart')">Walmart</button>
+    <button class="store-button" onclick="setDescription('Fresco')">Fresco</button>
+    <button class="store-button" onclick="setDescription("Shopper's Drug Mart")">Shopper's Drug Mart</button>
+    <button class="store-button" onclick="setDescription('Popeye\'s')">Popeye's</button>
+    <button class="store-button" onclick="setDescription('Amazon')">Amazon</button>
+    <button class="store-button" onclick="setDescription('Dollarama')">Dollarama</button>
+    <button class="store-button" onclick="setDescription('Fortinos')">Fortinos</button>
+    <button class="store-button" onclick="setDescription('Home Depot')">Home Depot</button>
+  </div>
+
   <div class="balance" id="balance">Remaining: $575.00</div>
+  <div id="transactions"></div>
 
   <script>
-    const MAX_BUDGET = 575;
+    let MAX_BUDGET = 575;
     let totalSpent = 0;
 
     const form = document.getElementById('transaction-form');
     const transactionsDiv = document.getElementById('transactions');
     const balanceDiv = document.getElementById('balance');
+
+    function updateBudget() {
+      const newBudget = parseFloat(document.getElementById('starting-budget').value);
+      if (!isNaN(newBudget) && newBudget > 0) {
+        MAX_BUDGET = newBudget;
+        totalSpent = 0;
+        transactionsDiv.innerHTML = '';
+        updateBalance();
+      }
+    }
+
+    function updateBalance() {
+      const remaining = (MAX_BUDGET - totalSpent).toFixed(2);
+      balanceDiv.textContent = `Remaining: $${remaining}`;
+    }
+
+    function setDescription(store) {
+      document.getElementById('description').value = store;
+    }
 
     form.addEventListener('submit', function(event) {
       event.preventDefault();
@@ -58,15 +134,14 @@
       if (isNaN(amount) || amount <= 0) return;
 
       totalSpent += amount;
-      const remaining = (MAX_BUDGET - totalSpent).toFixed(2);
+      const timestamp = new Date().toLocaleString();
 
       const entry = document.createElement('div');
       entry.className = 'transaction';
-      entry.textContent = `${description}: -$${amount.toFixed(2)}`;
-      transactionsDiv.appendChild(entry);
+      entry.textContent = `${timestamp} - ${description}: -$${amount.toFixed(2)}`;
+      transactionsDiv.prepend(entry);
 
-      balanceDiv.textContent = `Remaining: $${remaining}`;
-
+      updateBalance();
       form.reset();
     });
   </script>
