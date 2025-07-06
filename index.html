@@ -62,11 +62,6 @@
       margin-top: 20px;
       font-size: 1.2rem;
     }
-    .vendor-controls {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
   </style>
 </head>
 <body>
@@ -77,14 +72,8 @@
     <button onclick="updateBudget()">Set Budget</button>
   </div>
 
-  <div class="vendor-controls">
-    <select id="vendor-select"></select>
-    <input type="text" id="new-vendor" placeholder="Add New Vendor">
-    <button onclick="addVendor()">Add</button>
-  </div>
-
   <form id="transaction-form">
-    <input type="text" id="description" placeholder="Description" required>
+    <select id="vendor-select" required></select>
     <input type="number" id="amount" placeholder="Amount" required>
     <button type="submit">Add Transaction</button>
   </form>
@@ -95,7 +84,11 @@
   <script>
     const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxIBDX-ny3nfzVIA9tpmzt8Vx1--zLizxfZCgQyF5eQIzNI423_gugKJfj4GEOYBsxL/exec";
     let transactions = [];
-    let vendors = [];
+    let vendors = [
+      "Tim Hortons", "Pizza Pizza", "Walmart", "Fresco",
+      "Shoppers Drug Mart", "Popeyes", "Amazon",
+      "Dollarama", "Fortinos", "Home Depot"
+    ];
     let MAX_BUDGET = 0;
 
     async function loadData() {
@@ -103,7 +96,6 @@
         const res = await fetch(SHEET_WEBHOOK_URL);
         const data = await res.json();
         transactions = data.transactions || [];
-        vendors = data.vendors || [];
         MAX_BUDGET = parseFloat(data.budget) || 0;
         renderVendorOptions();
         renderTransactions();
@@ -128,19 +120,6 @@
         opt.textContent = v;
         vendorSelect.appendChild(opt);
       });
-      vendorSelect.onchange = () => {
-        document.getElementById("description").value = vendorSelect.value;
-      };
-    }
-
-    function addVendor() {
-      const newVendor = document.getElementById("new-vendor").value.trim();
-      if (newVendor && !vendors.includes(newVendor)) {
-        vendors.push(newVendor);
-        saveToSheet();
-        renderVendorOptions();
-        document.getElementById("new-vendor").value = '';
-      }
     }
 
     function renderTransactions() {
@@ -172,7 +151,7 @@
 
     document.getElementById("transaction-form").addEventListener("submit", e => {
       e.preventDefault();
-      const description = document.getElementById("description").value;
+      const description = document.getElementById("vendor-select").value;
       const amount = parseFloat(document.getElementById("amount").value);
       if (!description || isNaN(amount) || amount <= 0) return;
       const timestamp = new Date().toLocaleString();
