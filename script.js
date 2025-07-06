@@ -53,6 +53,7 @@ function deleteTransaction(index) {
 }
 
 function saveData() {
+  console.log("Saving:", { transactions, vendors, budget });
   updateUI(); // Optimistic update
   fetch(SHEET_URL, {
     method: "POST",

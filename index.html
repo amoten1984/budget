@@ -11,12 +11,12 @@
     <h1>Weekly Budget Tracker</h1>
     <div class="budget-input">
       <input type="number" id="weeklyBudget" placeholder="Set Weekly Budget"/>
-      <button onclick="setBudget()">Set Budget</button>
+      <button type="button" onclick="setBudget()">Set Budget</button>
     </div>
     <div class="transaction-input">
       <select id="vendorDropdown"></select>
       <input type="number" id="amount" placeholder="Amount"/>
-      <button onclick="addTransaction()">Add Transaction</button>
+      <button type="button" onclick="addTransaction()">Add Transaction</button>
     </div>
     <h2 id="remaining">Remaining: $0.00</h2>
     <ul id="transactionList"></ul>
