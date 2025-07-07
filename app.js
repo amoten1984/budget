@@ -75,7 +75,7 @@ document.getElementById('transaction-form').addEventListener('submit', async (e)
   e.preventDefault();
   const vendor = document.getElementById('vendor').value;
   const amount = parseFloat(document.getElementById('amount').value);
-  const date = new Date().toISOString(); // timestamp now
+  const date = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
 
   if (vendor && !isNaN(amount)) {
     await fetchJSON('/.netlify/functions/addTransaction', {
