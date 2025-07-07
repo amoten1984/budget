@@ -1,33 +1,28 @@
 const { Client } = require('pg');
+const { DateTime } = require('luxon'); // Add this line
 
-exports.handler = async (event) => {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
-  }
+exports.handler = async function (event) {
+  const { vendor, amount_cents } = JSON.parse(event.body);
 
-  const { vendor, amount_cents, description, date } = JSON.parse(event.body);
-  const client = new Client({ connectionString: process.env.NEON_DB_URL });
+  // Force EST/EDT using luxon
+  const now = DateTime.now().setZone('America/New_York').toISO(); // ISO string in EST/EDT
 
-  try {
-    await client.connect();
+  const client = new Client({
+    connectionString: process.env.NEON_DB_URL,
+    ssl: { rejectUnauthorized: false },
+  });
 
-    const vendorRes = await client.query(
-      'INSERT INTO vendors (name) VALUES ($1) ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name RETURNING id',
-      [vendor]
-    );
+  await client.connect();
 
-    const vendor_id = vendorRes.rows[0].id;
+  await client.query(
+    'INSERT INTO transactions (vendor, amount_cents, date) VALUES ($1, $2, $3)',
+    [vendor, amount_cents, now]
+  );
 
-    await client.query(
-      'INSERT INTO transactions (vendor_id, amount_cents, description, date) VALUES ($1, $2, $3, $4)',
-      [vendor_id, amount_cents, description, date]
-    );
+  await client.end();
 
-    return { statusCode: 200, body: JSON.stringify({ success: true }) };
-  } catch (err) {
-    console.error(err);
-    return { statusCode: 500, body: JSON.stringify({ error: 'Failed to add transaction' }) };
-  } finally {
-    await client.end();
-  }
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ success: true })
+  };
 };
