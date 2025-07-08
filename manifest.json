@@ -1,0 +1,20 @@
+{
+  "name": "Weekly Budget Tracker",
+  "short_name": "Budget",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1e1e1e",
+  "theme_color": "#1e1e1e",
+  "icons": [
+    {
+      "src": "assets/budget-icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/budget-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
