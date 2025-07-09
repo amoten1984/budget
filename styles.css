@@ -73,3 +73,26 @@ button:hover {
   align-items: center;
   flex-wrap: wrap;
 }
+
+.login-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+#auth {
+  background-color: #28d76f;
+  color: #000;
+  font-weight: bold;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: auto;
+}
+
+#auth:hover {
+  background-color: #22c35a;
+}
+
