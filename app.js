@@ -1,3 +1,33 @@
+let currentUser = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  const authBtn = document.getElementById('auth');
+
+  if (authBtn) {
+    authBtn.addEventListener('click', () => {
+      netlifyIdentity.open();
+    });
+  }
+
+  netlifyIdentity.on('init', (user) => {
+    currentUser = user;
+    console.log("Netlify Identity initialized. Current user:", user);
+  });
+
+  netlifyIdentity.on('login', (user) => {
+    currentUser = user;
+    console.log("User logged in:", user);
+    netlifyIdentity.close();
+    // You can trigger any user-specific UI updates here
+  });
+
+  netlifyIdentity.on('logout', () => {
+    currentUser = null;
+    console.log("User logged out");
+    // Optionally reload page or clear user data
+  });
+});
+
 async function fetchJSON(url, options = {}) {
   const res = await fetch(url, options);
   if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);

@@ -135,6 +135,7 @@
 <body>
   <div class="container">
     <h1>Weekly Budget Tracker</h1>
+    <button id="auth">Login / Sign Up</button>
     <div class="week-display" id="week-range">Loading week...</div>
 
     <h2>Set Weekly Budget</h2>
@@ -182,5 +183,27 @@
     </table>
   </div>
   <script src="app.js"></script>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script>
+  netlifyIdentity.init();
+
+  // Optional: Auto-open modal
+  document.addEventListener("DOMContentLoaded", () => {
+    const authButton = document.getElementById("auth");
+    if (authButton) {
+      authButton.addEventListener("click", () => netlifyIdentity.open());
+    }
+
+    netlifyIdentity.on("login", user => {
+      console.log("Logged in", user);
+      window.location.reload();
+    });
+
+    netlifyIdentity.on("logout", () => {
+      console.log("Logged out");
+      window.location.reload();
+    });
+  });
+</script>
 </body>
 </html>
