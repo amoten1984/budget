@@ -1,4 +1,3 @@
-
 const { Client } = require('pg');
 const sgMail = require('@sendgrid/mail');
 
@@ -93,13 +92,8 @@ module.exports = async function(event, context) {
 
     const subject = `Weekly Budget Summary: Week of ${startDateStr} - Total Spend: ${currency(totalSpendCents)}`;
 
-    const recipients = [process.env.EMAIL_TO];
-    if (process.env.EMAIL_TO_SECOND) {
-      recipients.push(process.env.EMAIL_TO_SECOND);
-    }
-
     await sgMail.send({
-      to: recipients,
+      to: process.env.EMAIL_TO,
       from: process.env.EMAIL_FROM,
       subject: subject,
       html: html
