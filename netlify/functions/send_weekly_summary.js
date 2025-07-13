@@ -71,10 +71,10 @@ exports.handler = async function(event, context) {
 
     const currency = amount => `$${(amount / 100).toFixed(2)}`;
 
-    let html = \`
+    let html = `
       <div style="font-family: Arial; max-width: 600px; margin: auto;">
         <h2>Weekly Budget Summary (${startDateStr} - ${endDateStr})</h2>
-        <p>Initial Budget: \${currency(budgetCents)}</p>
+        <p>Initial Budget: ${currency(budgetCents)}</p>
         <table style="width: 100%; border-collapse: collapse;">
           <thead>
             <tr style="background: #eee;">
@@ -85,32 +85,32 @@ exports.handler = async function(event, context) {
             </tr>
           </thead>
           <tbody>
-    \`;
+    `;
 
     transactions.forEach(tx => {
-      html += \`
+      html += `
         <tr>
-          <td>\${tx.date.toISOString().split('T')[0]}</td>
-          <td>\${tx.vendor}</td>
-          <td>\${tx.description}</td>
-          <td>\${currency(tx.amount_cents)}</td>
+          <td>${tx.date.toISOString().split('T')[0]}</td>
+          <td>${tx.vendor}</td>
+          <td>${tx.description}</td>
+          <td>${currency(tx.amount_cents)}</td>
         </tr>
-      \`;
+      `;
     });
 
-    html += \`
+    html += `
           </tbody>
         </table>
-        <p><strong>Total Spend:</strong> \${currency(totalSpendCents)}</p>
-        <p><strong>Remaining Budget:</strong> \${currency(remainingCents)}</p>
-        \${remainingCents > 0 
+        <p><strong>Total Spend:</strong> ${currency(totalSpendCents)}</p>
+        <p><strong>Remaining Budget:</strong> ${currency(remainingCents)}</p>
+        ${remainingCents > 0 
           ? '<p style="color: green;">🎉 You stayed under budget!</p>' 
           : '<p style="color: red;">⚠️ Budget exceeded.</p>'
         }
       </div>
-    \`;
+    `;
 
-    const subject = \`Weekly Budget Summary: Week of \${startDateStr} - Total Spend: \${currency(totalSpendCents)}\`;
+    const subject = `Weekly Budget Summary: Week of ${startDateStr} - Total Spend: ${currency(totalSpendCents)}`;
 
     const msg = {
       to: process.env.EMAIL_TO,
