@@ -5,5 +5,5 @@
 [functions]
   node_bundler = "esbuild"
 
-[functions."send_weekly_summary"]
-  schedule = "1 2 * * 0"  # Every Sunday at 12 PM UTC
+[functions."send_weekly_summary_scheduled"]
+  schedule = "0 12 * * 0"  # Every Sunday at 12:00 PM UTC = 8:00 AM EDT
