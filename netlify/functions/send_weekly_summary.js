@@ -2,16 +2,36 @@
 const { Client } = require('pg');
 const sgMail = require('@sendgrid/mail');
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
 exports.handler = async function(event, context) {
+  console.log("Function invoked");
+
+  if (!process.env.SENDGRID_API_KEY) {
+    console.error("Missing SENDGRID_API_KEY");
+    return { statusCode: 500, body: "Server error: missing SENDGRID_API_KEY" };
+  }
+
+  if (!process.env.NEON_DB_URL) {
+    console.error("Missing NEON_DB_URL");
+    return { statusCode: 500, body: "Server error: missing NEON_DB_URL" };
+  }
+
+  if (!process.env.EMAIL_TO || !process.env.EMAIL_FROM) {
+    console.error("Missing EMAIL_TO or EMAIL_FROM");
+    return { statusCode: 500, body: "Server error: missing EMAIL_TO or EMAIL_FROM" };
+  }
+
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  console.log("SendGrid API Key initialized");
+
   const db = new Client({
     connectionString: process.env.NEON_DB_URL,
     ssl: { rejectUnauthorized: false }
   });
 
   try {
+    console.log("Connecting to database...");
     await db.connect();
+    console.log("Database connected");
 
     const today = new Date();
     const day = today.getDay();
@@ -25,6 +45,8 @@ exports.handler = async function(event, context) {
     const startDateStr = startOfLastWeek.toISOString().split('T')[0];
     const endDateStr = endOfLastWeek.toISOString().split('T')[0];
 
+    console.log(`Querying transactions from ${startDateStr} to ${endDateStr}`);
+
     const txResult = await db.query(
       `SELECT t.date, v.name as vendor, t.description, t.amount_cents
        FROM transactions t
@@ -33,6 +55,8 @@ exports.handler = async function(event, context) {
        ORDER BY t.date ASC`, 
        [startDateStr, endDateStr]
     );
+
+    console.log(`Fetched ${txResult.rows.length} transactions`);
 
     const transactions = txResult.rows;
 
@@ -95,19 +119,22 @@ exports.handler = async function(event, context) {
       html: html
     };
 
+    console.log("Sending email...");
     await sgMail.send(msg);
+    console.log("Email sent successfully");
 
     await db.end();
+    console.log("Database connection closed");
 
     return {
       statusCode: 200,
-      body: 'Weekly summary email sent successfully.'
+      body: 'Manual test: Weekly summary email sent successfully.'
     };
   } catch (err) {
-    console.error(err);
+    console.error("Error occurred:", err);
     return {
       statusCode: 500,
-      body: 'Error sending weekly summary email.'
+      body: 'Manual test: Error sending weekly summary email.'
     };
   }
 };
