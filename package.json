@@ -1,7 +1,13 @@
 {
+  "name": "budget",
+  "version": "1.0.0",
+  "description": "Budget tracker project with weekly email summary",
+  "main": "index.js",
+  "scripts": {
+    "start": "netlify dev"
+  },
   "dependencies": {
-    "@sendgrid/mail": "^8.1.5",
-    "luxon": "^3.6.1",
-    "pg": "^8.16.3"
+    "pg": "^8.7.1",
+    "@sendgrid/mail": "^8.0.0"
   }
 }
