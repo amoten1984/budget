@@ -6,7 +6,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 exports.handler = async function(event, context) {
   const db = new Client({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: process.env.NEON_DB_URL,
     ssl: { rejectUnauthorized: false }
   });
 
