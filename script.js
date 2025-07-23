@@ -2,21 +2,42 @@ let transactions = [];
 let vendors = ["AMAZON", "WALMART", "PIZZA PIZZA", "FORTINOS", "DOLLARAMA"];
 let budget = 0;
 
+function getCurrentWeekRange() {
+  const now = new Date();
+  const day = now.getDay(); // Sunday = 0
+  const sunday = new Date(now);
+  sunday.setDate(now.getDate() - day);
+  sunday.setHours(0, 0, 0, 0);
+  const saturday = new Date(sunday);
+  saturday.setDate(sunday.getDate() + 6);
+  saturday.setHours(23, 59, 59, 999);
+  return { sunday, saturday };
+}
+
 function updateUI() {
   document.getElementById("weeklyBudget").value = budget;
-  document.getElementById("remaining").innerText = `Remaining: $${(budget - transactions.reduce((acc, t) => acc + Number(t.amount), 0)).toFixed(2)}`;
 
   const list = document.getElementById("transactionList");
   list.innerHTML = "";
-  transactions.forEach((t, index) => {
+
+  const { sunday, saturday } = getCurrentWeekRange();
+  const currentWeekTxns = transactions.filter(t => {
+    const txTime = new Date(t.timestamp);
+    return txTime >= sunday && txTime <= saturday;
+  });
+
+  currentWeekTxns.forEach((t, index) => {
     const li = document.createElement("li");
     li.className = "transaction-item";
     li.innerHTML = `
-      ${new Date(t.timestamp).toLocaleString('en-US', { weekday: 'short', hour: 'numeric', minute: 'numeric' })} - ${t.description}: $${t.amount}
+      ${new Date(t.timestamp).toLocaleString('en-US', { weekday: 'short', hour: 'numeric', minute: 'numeric', hour12: true })} - ${t.description}: $${t.amount}
       <button onclick="deleteTransaction(${index})">X</button>
     `;
     list.appendChild(li);
   });
+
+  const totalSpent = currentWeekTxns.reduce((acc, t) => acc + Number(t.amount), 0);
+  document.getElementById("remaining").innerText = `Remaining: $${(budget - totalSpent).toFixed(2)}`;
 
   const dropdown = document.getElementById("vendorDropdown");
   dropdown.innerHTML = vendors.map(v => `<option value="${v}">${v}</option>`).join('');
