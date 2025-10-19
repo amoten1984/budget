@@ -5,7 +5,7 @@ exports.handler = async function (event) {
   const { vendor, amount_cents } = JSON.parse(event.body);
 
   // Get current time in EST
-  const now = DateTime.now().setZone('America/New_York').toISODate(); // DATE only (not timestamp)
+  const now = DateTime.now().setZone('America/New_York').toFormat('yyyy-MM-dd HH:mm:ss ZZZZ'); // DATE only (not timestamp)
 
   const client = new Client({
     connectionString: process.env.NEON_DB_URL,
